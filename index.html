@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<script type="text/javascript" src="/lib/d3.v5.min.js"></script>
+<link href="css/all.min.css" rel="stylesheet">
+<link href="css/fonts.css" rel="stylesheet">
+<link href="css/sb-admin-2.min.css" rel="stylesheet">
+<link href="css/app.css" rel="stylesheet">
+<link href="css/bootstrap-multiselect.css" rel="stylesheet">
+<script src="lib/d3-scale-chromatic.v1.min.js"></script>
+<script src="lib/topojson.v2.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.bundle.min.js"></script>
+<script src="lib/bootstrap-multiselect.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCNDAUv3EAaxedA5NOMPgx9rwRcu_NTvXs&libraries=visualization"
+    type="text/javascript"></script>
+</script>
+<script src="https://d3js.org/d3-array.v1.min.js"></script>
+<script src="https://d3js.org/d3-geo.v1.min.js"></script>
+
+<title>Traffik - Team 53 Project</title>
+</style>
+
+<body>
+    <div class="loading" id="loader" style="z-index: 1000;">Loading&#8230;</div>
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-text mx-3">Traffik</div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item active" id="base_nav">
+                <a class="nav-link" href="index.html" id="base">
+                    <i class="fab fa-fw fa-wpexplorer"></i>
+                    <span>Explore the Data</span></a>
+            </li>
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item" id="ml_nav">
+                <a class="nav-link" href="index.html" id="ml">
+                    <i class="fab fa-fw fa-laravel"></i>
+                    <span>ML estimates</span></a>
+            </li>
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item">
+                <a class="nav-link" href="/linechart_count.html" target="_blank">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Counts over time</span></a>
+            </li>
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item">
+                <a class="nav-link" href="/linechart_percapita.html" target="_blank">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Rates over time</span></a>
+            </li>
+
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- Content Row -->
+
+                    <div class="row mt-3" id="hist_card">
+
+                        <!-- Area Chart -->
+                        <div class="col-xl-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <div
+                                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Exploring the data</h6>
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body mb-4">
+                                    <p>Below are visualizations on historical traffic accident fatality rates in the
+                                        United States. Click on a state to zoom into that state and view fatailities
+                                        by county and on a county to see a heatmap with fatalities.</p>
+                                </div>
+                                <h3 class="text-center font-weight-bold text-primary text-uppercase mb-4"
+                                    id="title_hist">
+                                    United States Fatal Traffic Accidents</h3>
+                                <div class="row">
+                                    <div id="target_hist" class="text-center mt-1 col-lg-8 mb-2 ml-2" height="40em"
+                                        style="min-width:1050px">
+                                        <button type="button" id="back-button-hist" style="visibility: hidden;"
+                                            class="btn btn-primary btn-group-vertical float-button-group btn-circle"><i
+                                                class="fas fa-arrow-alt-circle-left fa-2x"></i></button>
+                                        <svg id="legend_hist" width="1001px" height="3em"></svg>
+                                        <div id="gmap_hist" class="gmap"></div>
+                                    </div>
+                                    <div id="hist_filters" class="col-lg-3 pr-5">
+                                        <h4 class="text-primary">Filters</h4>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend" title="Year filter">
+                                                <span class="input-group-text ">Years</span>
+                                            </div>
+                                            <select id="year-filter" multiple="multiple">
+                                                <option selected="selected">2000</option>
+                                                <option selected="selected">2001</option>
+                                                <option selected="selected">2002</option>
+                                                <option selected="selected">2003</option>
+                                                <option selected="selected">2004</option>
+                                                <option selected="selected">2005</option>
+                                                <option selected="selected">2006</option>
+                                                <option selected="selected">2007</option>
+                                                <option selected="selected">2008</option>
+                                                <option selected="selected">2009</option>
+                                                <option selected="selected">2010</option>
+                                                <option selected="selected">2011</option>
+                                                <option selected="selected">2012</option>
+                                                <option selected="selected">2013</option>
+                                                <option selected="selected">2014</option>
+                                                <option selected="selected">2015</option>
+                                                <option selected="selected">2016</option>
+                                                <option selected="selected">2017</option>
+                                                <option selected="selected">2018</option>
+                                            </select>
+                                        </div>
+                                        <br>
+                                        <h5>Driver</h5>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend" title="Involving Speeding">
+                                                <span class="input-group-text">Speeding</span>
+                                            </div>
+                                            <select id="speeding-filter" multiple="multiple">
+                                                <option selected="selected" value="1">Yes</option>
+                                                <option selected="selected" value="2">No</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend"
+                                                title="Involving a Driver With Positive Blood Alcohol Content level">
+                                                <span class="input-group-text">Positive BAC</span>
+                                            </div>
+                                            <select id="bac-filter" multiple="multiple">
+                                                <option selected="selected" value="1">Yes</option>
+                                                <option selected="selected" value="2">No</option>
+                                                <option selected="selected" value="3">Unknown</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend" title="Involving a Distracted Driver">
+                                                <span class="input-group-text">Distracted</span>
+                                            </div>
+                                            <select id="distracted-filter" multiple="multiple">
+                                                <option selected="selected" value="1">Yes</option>
+                                                <option selected="selected" value="2">No</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend" title="Involving a Drowsy Driver">
+                                                <span class="input-group-text">Drowsy</span>
+                                            </div>
+                                            <select id="drowsy-filter" multiple="multiple">
+                                                <option selected="selected" value="1">Yes</option>
+                                                <option selected="selected" value="2">No</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend"
+                                                title="This data element identifies this person’s age group at the time of the crash.">
+                                                <span class="input-group-text">Age</span>
+                                            </div>
+                                            <select id="age-filter" multiple="multiple">
+                                                <option selected="selected" value="Young Adult (21-24)">Young Adult
+                                                    (21-24)</option>
+                                                <option selected="selected" value="Teen (15-20)">Teen (15-20)</option>
+                                                <option selected="selected" value="Adult (25-64)">Adult (25-64)</option>
+                                                <option selected="selected" value="Senior (65+)">Senior (65+)</option>
+                                            </select>
+                                        </div><br>
+                                        <h5>Road Conditions</h5>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend"
+                                                title="Type of work zone fataility occurred in. This data element identifies a “Work Zone Accident” as defined in ANSI D16.1, 7th Edition. ">
+                                                <span class="input-group-text">Work Zone</span>
+                                            </div>
+                                            <select id="work-filter" multiple="multiple">
+                                                <option selected="selected" value="0">None</option>
+                                                <option selected="selected" value="1">Construction</option>
+                                                <option selected="selected" value="2">Maintenance</option>
+                                                <option selected="selected" value="3">Utility</option>
+                                                <option selected="selected" value="4">Generic zone</option>
+                                                <option selected="selected" value="8">Not reported</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend" title="Type of weather hazardous or not. ">
+                                                <span class="input-group-text">Adverse Weather</span>
+                                            </div>
+                                            <select id="weather-filter" multiple="multiple">
+                                                <option selected="selected" value="0">No</option>
+                                                <option selected="selected" value="1">Yes</option>
+                                                <option selected="selected" value="99">Unknown</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-primary centered col-12 mb-4"
+                                            onclick="updateMap()">Update Map</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3 hide" id="ml_card">
+
+                        <!-- Area Chart -->
+                        <div class="col-xl-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <!-- Card Header - Dropdown -->
+                                <div
+                                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Machine Learning Estimates</h6>
+                                </div>
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <p>Below are visualizations of the output of two machine learning methods, a neural
+                                        network and linear regression to predict yearly fatalities with user input based
+                                        features.</p>
+                                </div>
+                                <div class="row ml-4 mr-3">
+                                    <div class="col-3">
+                                        <h3 class="text-primary">Features</h3>
+                                        <p>Select the features you want to see.</p>
+                                    </div>
+                                    <div class="col-3">
+                                        <h5>More Driver</h5>
+
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend" title="Involving a Drowsy Driver">
+                                                <span class="input-group-text">Drowsy</span>
+                                            </div>
+                                            <select id="drowsy-feature" multiple="multiple">
+                                                <option selected="selected" value="1">Yes</option>
+                                                <option selected="selected" value="2">No</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend"
+                                                title="This data element identifies this person’s age group at the time of the crash.">
+                                                <span class="input-group-text">Age</span>
+                                            </div>
+                                            <select id="age-feature" multiple="multiple">
+                                                <option selected="selected" value="Young Adult (21-24)">Young Adult
+                                                    (21-24)</option>
+                                                <option selected="selected" value="Teen (15-20)">Teen (15-20)</option>
+                                                <option selected="selected" value="Adult (25-64)">Adult (25-64)</option>
+                                                <option selected="selected" value="Senior (65+)">Senior (65+)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <h5>Driver</h5>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend" title="Involving Speeding">
+                                                <span class="input-group-text">Speeding</span>
+                                            </div>
+                                            <select id="speeding-feature" multiple="multiple">
+                                                <option selected="selected" value="1">Yes</option>
+                                                <option selected="selected" value="2">No</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend"
+                                                title="Involving a Driver With Positive Blood Alcohol Content level">
+                                                <span class="input-group-text">Positive BAC</span>
+                                            </div>
+                                            <select id="bac-feature" multiple="multiple">
+                                                <option selected="selected" value="1">Yes</option>
+                                                <option selected="selected" value="2">No</option>
+                                                <option selected="selected" value="3">Unknown</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend" title="Involving a Distracted Driver">
+                                                <span class="input-group-text">Distracted</span>
+                                            </div>
+                                            <select id="distracted-feature" multiple="multiple">
+                                                <option selected="selected" value="1">Yes</option>
+                                                <option selected="selected" value="2">No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <h5>Conditions</h5>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend"
+                                                title="Type of work zone fataility occurred in. This data element identifies a “Work Zone Accident” as defined in ANSI D16.1, 7th Edition. ">
+                                                <span class="input-group-text">Work Zone</span>
+                                            </div>
+                                            <select id="work-feature" multiple="multiple">
+                                                <option selected="selected" value="0">None</option>
+                                                <option selected="selected" value="1">Construction</option>
+                                                <option selected="selected" value="2">Maintenance</option>
+                                                <option selected="selected" value="3">Utility</option>
+                                                <option selected="selected" value="4">Generic zone</option>
+                                                <option selected="selected" value="8">Not reported</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-md mb-3 border">
+                                            <div class="input-group-prepend" title="Type of weather hazardous or not. ">
+                                                <span class="input-group-text">Adverse Weather</span>
+                                            </div>
+                                            <select id="weather-feature" multiple="multiple">
+                                                <option selected="selected" value="0">No</option>
+                                                <option selected="selected" value="1">Yes</option>
+                                                <option selected="selected" value="99">Unknown</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary col-3  m-auto" onclick="updateMLMap()">
+                                    <span>Predict Fatalities</span>
+                                </button>
+                                <h3 class="text-center font-weight-bold text-primary text-uppercase mt-4" id="title_ml">
+                                    United States Fatal Traffic Accidents Yearly Estimates</h3>
+                                <div class="row">
+                                    <div id="target_ml1" class="col-12 text-center">
+                                        <h4>Neural Network</h4>
+                                        <button type="button" id="back-button-ml1" style="visibility: hidden;"
+                                            class="btn btn-primary btn-group-vertical float-button-group btn-circle"><i
+                                                class="fas fa-arrow-alt-circle-left fa-2x"></i></button>
+                                        <svg id="legend_ml1" width="1200px" height="3em"></svg>
+                                    </div>
+                                    <div id="target_ml2" class="col-12 text-center">
+                                        <h4>Linear Regression</h4>
+                                        <button type="button" id="back-button-ml2" style="visibility: hidden;"
+                                            class="btn btn-primary btn-group-vertical float-button-group btn-circle"><i
+                                                class="fas fa-arrow-alt-circle-left fa-2x"></i></button>
+                                        <svg id="legend_ml2" width="1200px" height="3em"></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Team 53 CSE6242 Spring 2020</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+</body>
+<script>
+    // navigation with javascript.
+    document.getElementById("base").addEventListener("click", ev => {
+        ev.preventDefault();
+        document.getElementById("base_nav").classList.add("active");
+        document.getElementById("ml_nav").classList.remove("active");
+        document.getElementById("ml_card").classList.add("hide");
+        document.getElementById("hist_card").classList.remove("hide");
+    }, false);
+    document.getElementById("ml").addEventListener("click", ev => {
+        ev.preventDefault();
+        document.getElementById("base_nav").classList.remove("active");
+        document.getElementById("ml_nav").classList.add("active");
+        document.getElementById("hist_card").classList.add("hide");
+        document.getElementById("ml_card").classList.remove("hide");
+        init_ml()
+    }, false);
+</script>
+<script type="text/javascript" src="js/script.js"></script>
+<script type="text/javascript" src="js/script_ml.js"></script>
+
+</html>
